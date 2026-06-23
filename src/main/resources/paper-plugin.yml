@@ -1,0 +1,10 @@
+name: Inarifarms
+description: $description
+version: '${version}'
+
+main: dev.notmarra.inarifarms.Inarifarms
+api-version: '26.2'
+load: POSTWORLD
+
+authors: [ NotMarra ]
+website: notmarra.dev
