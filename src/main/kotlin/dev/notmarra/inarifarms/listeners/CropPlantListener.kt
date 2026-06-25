@@ -41,7 +41,10 @@ class CropPlantListener(
 
             cropBlock.type = Material.CARROTS
 
-            val newState = CropState(crop.fullId, 1, 100)
+            val timePerStage = (crop.growthTime * 1000L) / crop.maxGrowthStage
+            val nextGrowthTime = System.currentTimeMillis() + timePerStage
+
+            val newState = CropState(crop.fullId, 1, 100, nextGrowthTime)
             dataManager.saveCropData(cropBlock, newState)
         }
     }

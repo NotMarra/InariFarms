@@ -5,6 +5,7 @@ import dev.notmarra.inarifarms.data.CropDataManager
 import dev.notmarra.inarifarms.display.HoverDisplayManager
 import dev.notmarra.inarifarms.items.ItemManager
 import dev.notmarra.inarifarms.listeners.CropPlantListener
+import dev.notmarra.inarifarms.tasks.CropGrowthTask
 import dev.notmarra.inarifarms.utils.CommandBuilder
 import dev.notmarra.inarifarms.utils.config.ConfigManager
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
@@ -25,7 +26,7 @@ class Inarifarms : JavaPlugin() {
 
         val dataManager = CropDataManager(this)
         val itemManager = ItemManager(this)
-        val commandBuilder = CommandBuilder(cropRegistry)
+        val commandBuilder = CommandBuilder(this, dataManager, cropRegistry)
 
         displayManager = HoverDisplayManager(this, dataManager, cropRegistry)
 
@@ -34,7 +35,11 @@ class Inarifarms : JavaPlugin() {
         this.lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) { event ->
             val commands = event.registrar()
             commands.register(commandBuilder.giveSeedCommand(itemManager))
+            commands.register("inaridebug", commandBuilder.debugCommand())
         }
+
+        val growthTask = CropGrowthTask(this, dataManager, cropRegistry)
+        server.globalRegionScheduler.runAtFixedRate(this, { growthTask.run() }, 100L, 100L)
 
         logger.info("Inarifarms successfully loaded!")
     }

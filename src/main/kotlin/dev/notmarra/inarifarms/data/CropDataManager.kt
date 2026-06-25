@@ -31,13 +31,18 @@ class CropDataManager(plugin: Plugin) {
         chunk.persistentDataContainer.set(chunkDataKey, PersistentDataType.STRING, json)
     }
 
-    private fun getChunkCrops(chunk: Chunk): HashMap<String, CropState> {
+    fun getChunkCrops(chunk: Chunk): HashMap<String, CropState> {
         val container = chunk.persistentDataContainer
         val json = container.get(chunkDataKey, PersistentDataType.STRING) ?: return HashMap()
         val type = object : TypeToken<HashMap<String, CropState>>() {}.type
         val result: HashMap<String, CropState>? = gson.fromJson(json, type)
         val finalResult = result ?: HashMap()
         return finalResult
+    }
+
+    fun saveChunkCrops(chunk: Chunk, crops: HashMap<String, CropState>) {
+        val json = gson.toJson(crops)
+        chunk.persistentDataContainer.set(chunkDataKey, PersistentDataType.STRING, json)
     }
 
     private fun getBlockKey(block: Block): String {
