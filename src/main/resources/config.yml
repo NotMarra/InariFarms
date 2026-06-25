@@ -1,0 +1,8 @@
+debug: false
+
+prefix: "<gradient:#59ff00:#37db00><b>InariFarms <dark_gray>» <white>"
+
+display-text:
+  - " <#59ff00>❀ %displayName% <#59ff00>❀ "
+  - "<gray>Moisture: <#37db00>%moisture%"
+  - "<gray>Stage: <#37db00>%stage%<white>/%finalStage%"

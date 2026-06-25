@@ -1,9 +1,26 @@
 package dev.notmarra.inarifarms.crops
 
-interface Crop {
-    val id: String
-    val displayName: String
-    val maxGrowthStage: Int
-    val baseGrowTime: Int
-    val waterConsumption: Int
+import org.spongepowered.configurate.objectmapping.ConfigSerializable
+import org.spongepowered.configurate.objectmapping.meta.Setting
+
+@ConfigSerializable
+data class Crop(
+    val id: String = "",
+    val displayName: String = "",
+    val maxGrowthStage: Int = 7,
+    val growthTime: Int = 120,
+    val waterConsumption: Int = 1,
+    val seed: SeedConfig = SeedConfig()
+) {
+    val fullId: String
+        get() = if (id.startsWith("inari:")) id else "inari:$id"
 }
+
+@ConfigSerializable
+data class SeedConfig(
+    val material: String = "WHEAT_SEEDS",
+    val name: String = "",
+    val lore: List<String> = listOf(),
+    @Setting("item_model")
+    val itemModel: String? = null
+)

@@ -1,8 +1,10 @@
 package dev.notmarra.inarifarms.display
 
+import dev.notmarra.inarifarms.Inarifarms
+import dev.notmarra.inarifarms.crops.CropRegistry
 import dev.notmarra.inarifarms.data.CropDataManager
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.entity.Display
 import org.bukkit.entity.Player
@@ -11,15 +13,16 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.plugin.Plugin
 import java.util.UUID
 
 class HoverDisplayManager(
-    private val plugin: Plugin,
-    private val dataManager: CropDataManager
+    private val plugin: Inarifarms,
+    private val dataManager: CropDataManager,
+    private val cropRegistry: CropRegistry
 ) : Listener {
 
     private val playerDisplays = HashMap<UUID, TextDisplay>()
+    private val conf = plugin.configManager.config
 
     init {
         plugin.server.pluginManager.registerEvents(this, plugin)
@@ -77,28 +80,30 @@ class HoverDisplayManager(
             val cropState = dataManager.getCropData(targetBlock)
 
             if (cropState != null) {
-                plugin.logger.info("DISPLAY: Found crop ${cropState.cropTypeId} at ${targetBlock.x},${targetBlock.y},${targetBlock.z}")
                 val displayLoc = targetBlock.location.add(0.5, 1.2, 0.5)
-                val cropName = if (cropState.cropTypeId == "inari:tomato") "Rajče" else "Neznámá plodina"
+                val crop = cropRegistry.getCrop(cropState.cropTypeId)
+                val cropName = crop?.displayName ?: "NaN"
+                val mm = MiniMessage.miniMessage()
 
-                val text = Component.empty()
-                    .append(Component.text("❀ ", NamedTextColor.RED))
-                    .append(Component.text(cropName, NamedTextColor.WHITE))
-                    .append(Component.text(" ❀", NamedTextColor.RED))
-                    .append(Component.newline())
-                    .append(Component.text("Vlhkost: ", NamedTextColor.GRAY))
-                    .append(Component.text("${cropState.currentMoisture}%", NamedTextColor.AQUA))
-                    .append(Component.newline())
-                    .append(Component.text("Růst: ", NamedTextColor.GRAY))
-                    .append(Component.text("Fáze ${cropState.currentStage}/7", NamedTextColor.GREEN))
+                val textLines = conf.displayText.map {
+                    it.replace("%displayName%", cropName)
+                        .replace("%moisture%", cropState.currentMoisture.toString())
+                        .replace("%stage%", cropState.currentStage.toString())
+                        .replace("%finalStage%", crop?.maxGrowthStage.toString())
+                }
+
+                val components = textLines.map { mm.deserialize(it) }
+
+                val finalText = components.reduce { acc, component ->
+                    acc.append(Component.newline()).append(component)
+                }
 
                 display.teleport(displayLoc)
-                display.text(text)
+                display.text(finalText)
                 return
             }
         }
 
-        // Move display away from player's sight when not hovering over crop
         val hideLoc = player.location.clone().apply { y = y - 100 }
         if (display.location.distance(hideLoc) > 1.0) {
             display.teleport(hideLoc)

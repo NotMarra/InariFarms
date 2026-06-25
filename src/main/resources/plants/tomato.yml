@@ -1,0 +1,21 @@
+# id of the plant (plugin itself adds "inari:" before that, so no collisions will happen)
+id: tomato
+
+display-name: "<#de1414>Tomato"
+max-growth-stage: 7
+# in seconds
+growth-time: 120
+water-consumption: 1
+
+seed:
+  # Material for seed item, can be used all items from https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
+  material: MELON_SEEDS
+  name: "%displayName%"
+  lore:
+    - "<gray>Plant me!"
+  # item model, if you use resourcepack generators, use nexo: / itemsadder: etc.
+  # item_model: "inari:tomato_seed"
+
+#TODO: planted item
+
+#TODO: item after harvest in inventory

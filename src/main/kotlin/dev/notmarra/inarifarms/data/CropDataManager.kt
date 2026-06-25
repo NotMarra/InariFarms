@@ -7,11 +7,10 @@ import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.Plugin
-import java.util.logging.Logger
 
 class CropDataManager(plugin: Plugin) {
     private val gson = Gson()
-    private val chunkDataKey = NamespacedKey(plugin, "chunk_crops")
+    private val chunkDataKey = NamespacedKey(plugin, "inari_chunk_crops")
 
     fun getCropData(block: Block): CropState? {
         val chunkCrops = getChunkCrops(block.chunk)

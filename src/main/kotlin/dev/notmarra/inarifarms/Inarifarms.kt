@@ -1,52 +1,48 @@
 package dev.notmarra.inarifarms
 
+import dev.notmarra.inarifarms.crops.CropRegistry
 import dev.notmarra.inarifarms.data.CropDataManager
 import dev.notmarra.inarifarms.display.HoverDisplayManager
 import dev.notmarra.inarifarms.items.ItemManager
 import dev.notmarra.inarifarms.listeners.CropPlantListener
-import io.papermc.paper.command.brigadier.BasicCommand
-import io.papermc.paper.command.brigadier.CommandSourceStack
+import dev.notmarra.inarifarms.utils.CommandBuilder
+import dev.notmarra.inarifarms.utils.config.ConfigManager
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
-import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 
 class Inarifarms : JavaPlugin() {
 
     private lateinit var displayManager: HoverDisplayManager
+    private lateinit var cropRegistry: CropRegistry
+    lateinit var configManager: ConfigManager
+        private set
 
     override fun onEnable() {
+        configManager = ConfigManager(this)
+        configManager.loadConfig()
+        cropRegistry = CropRegistry(this)
+        cropRegistry.loadAllCrops()
+
         val dataManager = CropDataManager(this)
         val itemManager = ItemManager(this)
+        val commandBuilder = CommandBuilder(cropRegistry)
 
-        displayManager = HoverDisplayManager(this, dataManager)
+        displayManager = HoverDisplayManager(this, dataManager, cropRegistry)
 
-        server.pluginManager.registerEvents(CropPlantListener(dataManager, itemManager), this)
+        server.pluginManager.registerEvents(CropPlantListener(dataManager, itemManager, cropRegistry), this)
 
         this.lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) { event ->
             val commands = event.registrar()
-
-            commands.register("giverajce", object : BasicCommand {
-                override fun execute(source: CommandSourceStack, args: Array<String>) {
-                    val sender = source.sender
-                    if (sender is Player) {
-                        sender.inventory.addItem(itemManager.createTomatoSeed())
-                        sender.sendMessage(Component.text("Dostal jsi Semínko Rajčete!", NamedTextColor.GREEN))
-                    }
-                }
-
-                override fun permission(): String = "inarifarms.admin"
-            })
+            commands.register(commandBuilder.giveSeedCommand(itemManager))
         }
 
-        logger.info("Inarifarms byl uspesne nacten!")
+        logger.info("Inarifarms successfully loaded!")
     }
 
     override fun onDisable() {
         if (::displayManager.isInitialized) {
             displayManager.cleanup()
         }
-        logger.info("Inarifarms byl uspesne vypnut!")
+        logger.info("Inarifarms successfully disabled!")
     }
 }
