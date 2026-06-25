@@ -15,6 +15,7 @@ class Inarifarms : JavaPlugin() {
 
     private lateinit var displayManager: HoverDisplayManager
     private lateinit var cropRegistry: CropRegistry
+    private lateinit var dataManager: CropDataManager
     lateinit var configManager: ConfigManager
         private set
 
@@ -24,12 +25,13 @@ class Inarifarms : JavaPlugin() {
         cropRegistry = CropRegistry(this)
         cropRegistry.loadAllCrops()
 
-        val dataManager = CropDataManager(this)
+        dataManager = CropDataManager(this)
         val itemManager = ItemManager(this)
         val commandBuilder = CommandBuilder(this, dataManager, cropRegistry)
 
         displayManager = HoverDisplayManager(this, dataManager, cropRegistry)
 
+        server.pluginManager.registerEvents(dataManager, this)
         server.pluginManager.registerEvents(CropPlantListener(dataManager, itemManager, cropRegistry), this)
 
         this.lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) { event ->
@@ -47,6 +49,9 @@ class Inarifarms : JavaPlugin() {
     override fun onDisable() {
         if (::displayManager.isInitialized) {
             displayManager.cleanup()
+        }
+        if (::dataManager.isInitialized) {
+            dataManager.flushAll()
         }
         logger.info("Inarifarms successfully disabled!")
     }

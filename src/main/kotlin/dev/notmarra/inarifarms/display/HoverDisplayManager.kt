@@ -11,8 +11,10 @@ import org.bukkit.entity.Display
 import org.bukkit.entity.Player
 import org.bukkit.entity.TextDisplay
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import java.util.UUID
 
@@ -23,20 +25,14 @@ class HoverDisplayManager(
 ) : Listener {
 
     private val playerDisplays = HashMap<UUID, TextDisplay>()
-
     private val lastLookedState = HashMap<UUID, Pair<Location, Int>?>()
+    private val lastUpdateMs = HashMap<UUID, Long>()
 
     private val conf = plugin.configManager.config
     private val mm = MiniMessage.miniMessage()
 
     init {
         plugin.server.pluginManager.registerEvents(this, plugin)
-
-        plugin.server.globalRegionScheduler.runAtFixedRate(plugin, {
-            for (player in Bukkit.getOnlinePlayers()) {
-                updateHoverDisplay(player)
-            }
-        }, 1L, 20L)
 
         for (player in Bukkit.getOnlinePlayers()) {
             spawnDisplayFor(player)
@@ -58,6 +54,18 @@ class HoverDisplayManager(
     fun onPlayerQuit(event: PlayerQuitEvent) {
         playerDisplays.remove(event.player.uniqueId)?.remove()
         lastLookedState.remove(event.player.uniqueId)
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    fun onPlayerMove(event: PlayerMoveEvent) {
+        if (!event.hasChangedOrientation()) return
+
+        val now = System.currentTimeMillis()
+        val last = lastUpdateMs[event.player.uniqueId] ?: 0L
+        if (now - last < 150) return
+        lastUpdateMs[event.player.uniqueId] = now
+
+        updateHoverDisplay(event.player)
     }
 
     private fun spawnDisplayFor(player: Player) {
