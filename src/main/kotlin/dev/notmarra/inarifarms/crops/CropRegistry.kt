@@ -30,7 +30,7 @@ class CropRegistry(private val plugin: Plugin) {
 
                 if (crop != null && crop.id.isNotEmpty()) {
                     crops[crop.fullId] = crop
-                    plugin.logger.info("Loaded crop ${crop.fullId}")
+                    plugin.logger.info("Loaded crop ${crop.id}")
                 } else {
                     plugin.logger.warning("File ${file.name} does not have ID")
                 }

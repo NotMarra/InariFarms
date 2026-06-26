@@ -1,6 +1,7 @@
 package dev.notmarra.inarifarms.utils.config
 
 import org.bukkit.plugin.Plugin
+import org.spongepowered.configurate.yaml.NodeStyle
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader
 import java.io.File
 
@@ -22,6 +23,7 @@ class ConfigManager(private val plugin: Plugin) {
 
         loader = YamlConfigurationLoader.builder()
             .path(configFile.toPath())
+            .nodeStyle(NodeStyle.BLOCK)
             .build()
 
         try {

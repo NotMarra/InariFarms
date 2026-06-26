@@ -1,7 +1,6 @@
 package dev.notmarra.inarifarms.listeners
 
 import dev.notmarra.inarifarms.crops.CropRegistry
-import dev.notmarra.inarifarms.data.CropDataManager
 import dev.notmarra.inarifarms.data.CropState
 import dev.notmarra.inarifarms.items.ItemManager
 import net.kyori.adventure.text.Component
@@ -15,7 +14,6 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.persistence.PersistentDataType
 
 class CropPlantListener(
-    private val dataManager: CropDataManager,
     private val itemManager: ItemManager,
     private val cropRegistry: CropRegistry
 ): Listener {
@@ -23,29 +21,13 @@ class CropPlantListener(
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
         if (event.action != Action.RIGHT_CLICK_BLOCK) return
-        val clickedBlock = event.clickedBlock ?: return
-        if (clickedBlock.type != Material.FARMLAND) return
-
         val item = event.item ?: return
         val meta = item.itemMeta ?: return
-
         val customId = meta.persistentDataContainer.get(itemManager.customItemKey, PersistentDataType.STRING) ?: return
-
         val crop = cropRegistry.getCrop(customId) ?: return
 
-        val cropBlock = clickedBlock.getRelative(BlockFace.UP)
-
-        if (cropBlock.type == Material.AIR) {
+        if (crop in cropRegistry.getAllCrops()) {
             event.isCancelled = true
-            item.amount -= 1
-
-            cropBlock.type = Material.CARROTS
-
-            val timePerStage = (crop.growthTime * 1000L) / crop.maxGrowthStage
-            val nextGrowthTime = System.currentTimeMillis() + timePerStage
-
-            val newState = CropState(crop.fullId, 1, 100, nextGrowthTime)
-            dataManager.saveCropData(cropBlock, newState)
         }
     }
 }

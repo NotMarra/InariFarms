@@ -1,0 +1,22 @@
+id: growth_station
+type: GROWTH
+display-name: "<Green>Growth Station"
+lore:
+  - "<gray>Place me!"
+
+block:
+  material: BARREL
+
+levels:
+  - level: 1
+    seed-slots: 1
+    storage-slots: 9
+    growth-speed-multiplier: 1.0
+  - level: 2
+    seed-slots: 3
+    storage-slots: 18
+    growth-speed-multiplier: 1.25
+  - level: 3
+    seed-slots: 6
+    storage-slots: 27
+    growth-speed-multiplier: 1.5

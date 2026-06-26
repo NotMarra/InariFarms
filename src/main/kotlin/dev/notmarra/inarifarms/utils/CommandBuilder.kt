@@ -4,7 +4,6 @@ import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.tree.LiteralCommandNode
 import dev.notmarra.inarifarms.Inarifarms
 import dev.notmarra.inarifarms.crops.CropRegistry
-import dev.notmarra.inarifarms.data.CropDataManager
 import dev.notmarra.inarifarms.items.ItemManager
 import io.papermc.paper.command.brigadier.BasicCommand
 import io.papermc.paper.command.brigadier.CommandSourceStack
@@ -14,7 +13,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.entity.Player
 
-class CommandBuilder(plugin: Inarifarms, private val dataManager: CropDataManager, private val cropRegistry: CropRegistry) {
+class CommandBuilder(plugin: Inarifarms, private val cropRegistry: CropRegistry) {
     private val conf = plugin.configManager.config
     fun giveSeedCommand(itemManager: ItemManager): LiteralCommandNode<CommandSourceStack> {
         return Commands.literal("giveseed")
@@ -50,7 +49,7 @@ class CommandBuilder(plugin: Inarifarms, private val dataManager: CropDataManage
             )
             .build()
     }
-
+/*
     fun debugCommand(): BasicCommand = object : BasicCommand {
         override fun execute(source: CommandSourceStack, args: Array<String>) {
             val sender = source.sender
@@ -87,4 +86,5 @@ class CommandBuilder(plugin: Inarifarms, private val dataManager: CropDataManage
 
         override fun permission(): String = "inarifarms.admin"
     }
+    */
 }
