@@ -5,6 +5,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode
 import dev.notmarra.inarifarms.Inarifarms
 import dev.notmarra.inarifarms.crops.CropRegistry
 import dev.notmarra.inarifarms.items.ItemManager
+import dev.notmarra.inarifarms.stations.StationRegistry
 import io.papermc.paper.command.brigadier.BasicCommand
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.Commands
@@ -13,7 +14,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.entity.Player
 
-class CommandBuilder(plugin: Inarifarms, private val cropRegistry: CropRegistry) {
+class CommandBuilder(plugin: Inarifarms, private val cropRegistry: CropRegistry, private val stationRegistry: StationRegistry) {
     private val conf = plugin.configManager.config
     fun giveSeedCommand(itemManager: ItemManager): LiteralCommandNode<CommandSourceStack> {
         return Commands.literal("giveseed")
@@ -42,6 +43,41 @@ class CommandBuilder(plugin: Inarifarms, private val cropRegistry: CropRegistry)
                             sender.sendMessage(Component.text("You received the seed for crop ${crop.id}!", NamedTextColor.GREEN))
                         } else {
                             sender.sendMessage(Component.text("Crop not found!", NamedTextColor.RED))
+                        }
+
+                        1
+                    }
+            )
+            .build()
+    }
+
+    fun giveStationCommand(itemManager: ItemManager): LiteralCommandNode<CommandSourceStack> {
+        return Commands.literal("givestation")
+            .requires { it.sender.hasPermission("inarifarms.admin") }
+            .then(
+                Commands.argument("id", StringArgumentType.word())
+                    .suggests { _, builder ->
+                        stationRegistry.getAllStations().forEach { station ->
+                            builder.suggest(station.id)
+                        }
+                        builder.buildFuture()
+                    }
+                    .executes { context ->
+                        val sender = context.source.sender
+                        if (sender !is Player) {
+                            sender.sendMessage(Component.text("Only a player can use this command.", NamedTextColor.RED))
+                            return@executes 0
+                        }
+
+                        val inputId = StringArgumentType.getString(context, "id")
+                        val searchId = if (inputId.startsWith("inari:")) inputId else "inari:$inputId"
+                        val station = stationRegistry.getStation(searchId)
+
+                        if (station != null) {
+                            sender.inventory.addItem(itemManager.createStationItem(station))
+                            sender.sendMessage(Component.text("You received the station ${station.id}!", NamedTextColor.GREEN))
+                        } else {
+                            sender.sendMessage(Component.text("Station not found!", NamedTextColor.RED))
                         }
 
                         1

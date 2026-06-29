@@ -3,6 +3,7 @@ package dev.notmarra.inarifarms.items
 import com.destroystokyo.paper.profile.PlayerProfile
 import com.destroystokyo.paper.profile.ProfileProperty
 import dev.notmarra.inarifarms.crops.Crop
+import dev.notmarra.inarifarms.stations.Station
 import io.papermc.paper.datacomponent.DataComponentTypes
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.format.TextDecoration
@@ -17,7 +18,7 @@ import org.bukkit.plugin.Plugin
 import java.util.UUID
 
 class ItemManager(plugin: Plugin) {
-    val customItemKey = NamespacedKey(plugin, "inari_seed_item")
+    val customItemKey = NamespacedKey(plugin, "inari_item")
     private val mm = MiniMessage.miniMessage()
 
     fun createSeed(crop: Crop): ItemStack {
@@ -48,6 +49,26 @@ class ItemManager(plugin: Plugin) {
                 item.itemMeta = this
             }
         }
+
+        return item
+    }
+
+    fun createStationItem(station: Station): ItemStack {
+        val material = Material.matchMaterial(station.block.material) ?: Material.BARREL
+        val item = ItemStack(material)
+        val meta = item.itemMeta ?: return item
+
+        if (station.lore.isNotEmpty()) {
+            meta.lore(station.lore.map { mm.deserialize(it).decoration(TextDecoration.ITALIC, false) })
+        }
+
+        meta.persistentDataContainer.set(customItemKey, PersistentDataType.STRING, station.fullId)
+        item.itemMeta = meta
+
+        item.setData(
+            DataComponentTypes.CUSTOM_NAME,
+            mm.deserialize(station.displayName).decoration(TextDecoration.ITALIC, false)
+        )
 
         return item
     }
