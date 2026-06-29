@@ -1,12 +1,15 @@
 package dev.notmarra.inarifarms.listeners
 
 import dev.notmarra.inarifarms.data.BlockDataManager
+import dev.notmarra.inarifarms.gui.StationGui
 import dev.notmarra.inarifarms.items.ItemManager
 import dev.notmarra.inarifarms.stations.StationRegistry
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
+import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.persistence.PersistentDataType
 
 class StationBlockListener(
@@ -48,5 +51,21 @@ class StationBlockListener(
 
         blockDataManager.removeStation(block)
         event.player.sendMessage("Stanice ${station.displayName} zničena!")
+    }
+
+    @EventHandler
+    fun onBlockInteract(event: PlayerInteractEvent) {
+        if (event.action != Action.RIGHT_CLICK_BLOCK) return
+        val block = event.clickedBlock ?: return
+        if (!blockDataManager.isStation(block)) return
+
+        event.isCancelled = true
+
+        val stationId = blockDataManager.getStationType(block) ?: return
+        val level = blockDataManager.getStationLevel(block)
+        val station = stationRegistry.getStation(stationId) ?: return
+        val stationLevel = station.getLevel(level) ?: return
+
+        StationGui(station, stationLevel, block, itemManager, blockDataManager).open(event.player)
     }
 }

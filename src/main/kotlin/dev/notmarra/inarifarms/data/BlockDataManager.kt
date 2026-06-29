@@ -1,7 +1,9 @@
 package dev.notmarra.inarifarms.data
 
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
+import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.Plugin
 
@@ -24,10 +26,16 @@ class BlockDataManager(private val plugin: Plugin) {
     private fun stationOwnerKeyForBlock(block: Block) =
         NamespacedKey(plugin, "station_owner_${blockKey(block)}")
 
-    fun setStation(block: Block, stationTypeId: String, level: Int, ownerUuid: String) {
-        val chunk = block.chunk
-        val pdc = chunk.persistentDataContainer
+    private fun seedSlotKeyForBlock(block: Block, slot: Int) =
+        NamespacedKey(plugin, "seed_${slot}_${blockKey(block)}")
 
+    private fun storageSlotKeyForBlock(block: Block, slot: Int) =
+        NamespacedKey(plugin, "stor_${slot}_${blockKey(block)}")
+
+    // --- Stanice ---
+
+    fun setStation(block: Block, stationTypeId: String, level: Int, ownerUuid: String) {
+        val pdc = block.chunk.persistentDataContainer
         pdc.set(stationTypeKeyForBlock(block), PersistentDataType.STRING, stationTypeId)
         pdc.set(stationLevelKeyForBlock(block), PersistentDataType.INTEGER, level)
         pdc.set(stationOwnerKeyForBlock(block), PersistentDataType.STRING, ownerUuid)
@@ -38,19 +46,53 @@ class BlockDataManager(private val plugin: Plugin) {
         return pdc.get(stationTypeKeyForBlock(block), PersistentDataType.STRING)
     }
 
-    fun getStationLevel(block: Block): Int? {
+    fun getStationLevel(block: Block): Int {
         val pdc = block.chunk.persistentDataContainer
-        return pdc.get(stationLevelKeyForBlock(block), PersistentDataType.INTEGER)
+        return pdc.get(stationLevelKeyForBlock(block), PersistentDataType.INTEGER) ?: 1
     }
 
-    fun isStation(block: Block): Boolean {
-        return getStationType(block) != null
-    }
+    fun isStation(block: Block): Boolean = getStationType(block) != null
 
     fun removeStation(block: Block) {
         val pdc = block.chunk.persistentDataContainer
         pdc.remove(stationTypeKeyForBlock(block))
         pdc.remove(stationLevelKeyForBlock(block))
         pdc.remove(stationOwnerKeyForBlock(block))
+    }
+
+    // --- Seed sloty ---
+
+    fun setSeedSlotItem(block: Block, slot: Int, item: ItemStack?) {
+        val pdc = block.chunk.persistentDataContainer
+        val key = seedSlotKeyForBlock(block, slot)
+        if (item == null || item.type == Material.AIR) {
+            pdc.remove(key)
+        } else {
+            pdc.set(key, PersistentDataType.BYTE_ARRAY, item.serializeAsBytes())
+        }
+    }
+
+    fun getSeedSlotItem(block: Block, slot: Int): ItemStack? {
+        val pdc = block.chunk.persistentDataContainer
+        val bytes = pdc.get(seedSlotKeyForBlock(block, slot), PersistentDataType.BYTE_ARRAY) ?: return null
+        return ItemStack.deserializeBytes(bytes)
+    }
+
+    // --- Storage sloty ---
+
+    fun setStorageSlotItem(block: Block, slot: Int, item: ItemStack?) {
+        val pdc = block.chunk.persistentDataContainer
+        val key = storageSlotKeyForBlock(block, slot)
+        if (item == null || item.type == Material.AIR) {
+            pdc.remove(key)
+        } else {
+            pdc.set(key, PersistentDataType.BYTE_ARRAY, item.serializeAsBytes())
+        }
+    }
+
+    fun getStorageSlotItem(block: Block, slot: Int): ItemStack? {
+        val pdc = block.chunk.persistentDataContainer
+        val bytes = pdc.get(storageSlotKeyForBlock(block, slot), PersistentDataType.BYTE_ARRAY) ?: return null
+        return ItemStack.deserializeBytes(bytes)
     }
 }
