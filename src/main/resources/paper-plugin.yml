@@ -1,6 +1,7 @@
 name: Inarifarms
 description: $description
 version: '${version}'
+loader: dev.notmarra.inarifarms.loader.InariPluginLoader
 
 main: dev.notmarra.inarifarms.Inarifarms
 api-version: '26.2'

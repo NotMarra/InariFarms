@@ -7,13 +7,24 @@ plugins {
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://repo.xenondevs.xyz/releases")
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:26.2.build.+")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("org.spongepowered:configurate-yaml:4.2.0")
-    implementation("org.spongepowered:configurate-extra-kotlin:4.2.0")
+    compileOnly("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    compileOnly("org.spongepowered:configurate-yaml:4.2.0")
+    compileOnly("org.spongepowered:configurate-extra-kotlin:4.2.0")
+    compileOnly("xyz.xenondevs.invui:invui:2.1.1")
+    compileOnly("xyz.xenondevs.invui:invui-kotlin:2.1.1")
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs("src/main/kotlin", "src/main/java")
+        }
+    }
 }
 
 kotlin {
