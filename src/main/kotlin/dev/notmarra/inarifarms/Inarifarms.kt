@@ -10,6 +10,7 @@ import dev.notmarra.inarifarms.utils.CommandBuilder
 import dev.notmarra.inarifarms.utils.config.ConfigManager
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import org.bukkit.plugin.java.JavaPlugin
+import xyz.xenondevs.invui.InvUI
 
 class Inarifarms : JavaPlugin() {
 
@@ -25,6 +26,7 @@ class Inarifarms : JavaPlugin() {
         cropRegistry.loadAllCrops()
         stationRegistry = StationRegistry(this)
         stationRegistry.loadAllStations()
+        InvUI.getInstance().setPlugin(this)
 
         val blockDataManager = BlockDataManager(this)
         val itemManager = ItemManager(this)

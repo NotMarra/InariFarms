@@ -26,8 +26,8 @@ class BlockDataManager(private val plugin: Plugin) {
     private fun stationOwnerKeyForBlock(block: Block) =
         NamespacedKey(plugin, "station_owner_${blockKey(block)}")
 
-    private fun seedSlotKeyForBlock(block: Block, slot: Int) =
-        NamespacedKey(plugin, "seed_${slot}_${blockKey(block)}")
+    private fun seedSlotKeyForBlock(block: Block) =
+        NamespacedKey(plugin, "seed_${blockKey(block)}")
 
     private fun storageSlotKeyForBlock(block: Block, slot: Int) =
         NamespacedKey(plugin, "stor_${slot}_${blockKey(block)}")
@@ -60,11 +60,10 @@ class BlockDataManager(private val plugin: Plugin) {
         pdc.remove(stationOwnerKeyForBlock(block))
     }
 
-    // --- Seed sloty ---
 
-    fun setSeedSlotItem(block: Block, slot: Int, item: ItemStack?) {
+    fun setSeedSlotItem(block: Block,  item: ItemStack?) {
         val pdc = block.chunk.persistentDataContainer
-        val key = seedSlotKeyForBlock(block, slot)
+        val key = seedSlotKeyForBlock(block)
         if (item == null || item.type == Material.AIR) {
             pdc.remove(key)
         } else {
@@ -72,9 +71,9 @@ class BlockDataManager(private val plugin: Plugin) {
         }
     }
 
-    fun getSeedSlotItem(block: Block, slot: Int): ItemStack? {
+    fun getSeedSlotItem(block: Block): ItemStack? {
         val pdc = block.chunk.persistentDataContainer
-        val bytes = pdc.get(seedSlotKeyForBlock(block, slot), PersistentDataType.BYTE_ARRAY) ?: return null
+        val bytes = pdc.get(seedSlotKeyForBlock(block), PersistentDataType.BYTE_ARRAY) ?: return null
         return ItemStack.deserializeBytes(bytes)
     }
 

@@ -9,14 +9,54 @@ block:
 
 levels:
   - level: 1
-    seed-slots: 1
-    storage-slots: 9
+    storage-slots: 4
     growth-speed-multiplier: 1.0
   - level: 2
-    seed-slots: 3
-    storage-slots: 18
+    storage-slots: 12
     growth-speed-multiplier: 1.25
   - level: 3
-    seed-slots: 6
-    storage-slots: 27
+    storage-slots: 20
     growth-speed-multiplier: 1.5
+
+gui:
+  # symbols $,&,» and « are dedicated and can not be used, $ is slot for seed and & are inventory slots. Symbols »« are pagination buttons
+  structure:
+    - "#########"
+    - "#xxx&&&&»"
+    - "#x$x&&&&#"
+    - "#xxx&&&&«"
+    - "########?"
+
+  title: "<dark_gray>Growth Station"
+  items:
+    "#":
+      material: BLACK_STAINED_GLASS_PANE
+      name: " "
+      lore:
+        - ""
+      # item-model: "inari:filler_item"
+
+    "?":
+      material: BOOK
+      name: "<green>Growth Station statistics"
+      lore:
+        - "<gray>Level: %level%/%maxLevel%"
+        - "<gray>Slots: %slots%"
+        - "<gray>Growth speed multiplier: %multiplier%"
+
+    lock:
+      material: BARRIER
+      name: "<RED>LOCKED"
+      lore:
+        - "<gray>You need better station"
+
+    »:
+      material: ARROW
+      name: "<white>Scroll up"
+      lore:
+        - ""
+    «:
+      material: ARROW
+      name: "<white>Scroll down"
+      lore:
+        - ""
