@@ -34,13 +34,17 @@ data class Station(
 data class StationLevel(
     val level: Int = 1,
     val storageSlots: Int = 9,
-    val growthSpeedMultiplier: Float = 1.0f,
+    val growthSpeedMultiplier: Double = 1.0,
+    @Setting("max-water")
+    val maxWater: Int = 10
 )
 
 @ConfigSerializable
 data class StationGui(
     val structure: List<String> = listOf(),
     val title: String = "<dark_gray>Station",
+    @Setting("status-lore")
+    val statusLoreConfig: StatusLoreConfig = StatusLoreConfig(),
     val items: Map<String, StationGuiItem> = emptyMap()
 )
 
@@ -52,4 +56,12 @@ data class StationGuiItem(
     val name: String = "",
     val lore: List<String> = listOf(),
     val itemModel: String? = null
+)
+
+@ConfigSerializable
+data class StatusLoreConfig(
+    val growing: List<String> = listOf(),
+    val waitingWater: List<String> = listOf(),
+    val waitingStorage: List<String> = listOf(),
+    val empty: List<String> = listOf()
 )

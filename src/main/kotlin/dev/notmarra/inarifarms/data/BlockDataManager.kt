@@ -8,9 +8,6 @@ import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.Plugin
 
 class BlockDataManager(private val plugin: Plugin) {
-    private val stationTypeKey = NamespacedKey(plugin, "station_type")
-    private val stationLevelKey = NamespacedKey(plugin, "station_level")
-    private val stationOwnerKey = NamespacedKey(plugin, "station_owner")
 
     private fun blockKey(block: Block): String {
         fun Int.toSafe() = if (this < 0) "n${-this}" else "$this"
@@ -30,9 +27,24 @@ class BlockDataManager(private val plugin: Plugin) {
         NamespacedKey(plugin, "seed_${blockKey(block)}")
 
     private fun storageSlotKeyForBlock(block: Block, slot: Int) =
-        NamespacedKey(plugin, "stor_${slot}_${blockKey(block)}")
+        NamespacedKey(plugin, "storage_${slot}_${blockKey(block)}")
 
-    // --- Stanice ---
+
+    private fun cropIdKeyForBlock(block: Block) =
+        NamespacedKey(plugin, "crop_id_${blockKey(block)}")
+
+    private fun cropStageKeyForBlock(block: Block) =
+        NamespacedKey(plugin, "crop_stage_${blockKey(block)}")
+
+    private fun cropMoistureKeyForBlock(block: Block) =
+        NamespacedKey(plugin, "crop_moisture_${blockKey(block)}")
+
+    private fun cropNextGrowthKeyForBlock(block: Block) =
+        NamespacedKey(plugin, "crop_next_growth_${blockKey(block)}")
+
+    private fun stationWaterKeyForBlock(block: Block) =
+        NamespacedKey(plugin, "station_water_${blockKey(block)}")
+
 
     fun setStation(block: Block, stationTypeId: String, level: Int, ownerUuid: String) {
         val pdc = block.chunk.persistentDataContainer
@@ -58,6 +70,8 @@ class BlockDataManager(private val plugin: Plugin) {
         pdc.remove(stationTypeKeyForBlock(block))
         pdc.remove(stationLevelKeyForBlock(block))
         pdc.remove(stationOwnerKeyForBlock(block))
+        removeCropState(block)
+        setSeedSlotItem(block, null)
     }
 
 
@@ -77,7 +91,6 @@ class BlockDataManager(private val plugin: Plugin) {
         return ItemStack.deserializeBytes(bytes)
     }
 
-    // --- Storage sloty ---
 
     fun setStorageSlotItem(block: Block, slot: Int, item: ItemStack?) {
         val pdc = block.chunk.persistentDataContainer
@@ -93,5 +106,43 @@ class BlockDataManager(private val plugin: Plugin) {
         val pdc = block.chunk.persistentDataContainer
         val bytes = pdc.get(storageSlotKeyForBlock(block, slot), PersistentDataType.BYTE_ARRAY) ?: return null
         return ItemStack.deserializeBytes(bytes)
+    }
+
+
+    fun setCropState(block: Block, state: CropState?) {
+        val pdc = block.chunk.persistentDataContainer
+        if (state == null) {
+            removeCropState(block)
+            return
+        }
+        pdc.set(cropIdKeyForBlock(block), PersistentDataType.STRING, state.cropTypeId)
+        pdc.set(cropStageKeyForBlock(block), PersistentDataType.INTEGER, state.currentStage)
+        pdc.set(cropNextGrowthKeyForBlock(block), PersistentDataType.LONG, state.nextGrowthTime)
+    }
+
+    fun getCropState(block: Block): CropState? {
+        val pdc = block.chunk.persistentDataContainer
+        val id = pdc.get(cropIdKeyForBlock(block), PersistentDataType.STRING) ?: return null
+        return CropState(
+            cropTypeId = id,
+            currentStage = pdc.get(cropStageKeyForBlock(block), PersistentDataType.INTEGER) ?: 0,
+            nextGrowthTime = pdc.get(cropNextGrowthKeyForBlock(block), PersistentDataType.LONG) ?: 0L
+        )
+    }
+
+    fun removeCropState(block: Block) {
+        val pdc = block.chunk.persistentDataContainer
+        pdc.remove(cropIdKeyForBlock(block))
+        pdc.remove(cropStageKeyForBlock(block))
+        pdc.remove(cropMoistureKeyForBlock(block))
+        pdc.remove(cropNextGrowthKeyForBlock(block))
+    }
+
+    fun setStationWater(block: Block, water: Int) {
+        block.chunk.persistentDataContainer.set(stationWaterKeyForBlock(block), PersistentDataType.INTEGER, water)
+    }
+
+    fun getStationWater(block: Block): Int {
+        return block.chunk.persistentDataContainer.get(stationWaterKeyForBlock(block), PersistentDataType.INTEGER) ?: 0
     }
 }

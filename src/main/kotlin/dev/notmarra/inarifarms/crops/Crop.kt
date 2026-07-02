@@ -11,7 +11,7 @@ data class Crop(
     val growthTime: Int = 120,
     val waterConsumption: Int = 1,
     val seed: SeedConfig = SeedConfig(),
-    val mature: MatureConfig = MatureConfig()
+    val mature: MatureConfig = MatureConfig(),
 ) {
     val fullId: String
         get() = if (id.startsWith("inari:")) id else "inari:$id"

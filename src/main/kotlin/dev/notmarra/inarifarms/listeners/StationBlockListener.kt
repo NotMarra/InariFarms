@@ -1,9 +1,11 @@
 package dev.notmarra.inarifarms.listeners
 
+import dev.notmarra.inarifarms.crops.CropRegistry
 import dev.notmarra.inarifarms.data.BlockDataManager
 import dev.notmarra.inarifarms.gui.StationGui
 import dev.notmarra.inarifarms.items.ItemManager
 import dev.notmarra.inarifarms.stations.StationRegistry
+import org.bukkit.Material
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
@@ -14,6 +16,7 @@ import org.bukkit.persistence.PersistentDataType
 
 class StationBlockListener(
     private val blockDataManager: BlockDataManager,
+    private val cropRegistry: CropRegistry,
     private val itemManager: ItemManager,
     private val stationRegistry: StationRegistry
     ) : Listener {
@@ -58,6 +61,7 @@ class StationBlockListener(
         if (event.action != Action.RIGHT_CLICK_BLOCK) return
         val block = event.clickedBlock ?: return
         if (!blockDataManager.isStation(block)) return
+        if (event.item?.type == Material.WATER_BUCKET) return
 
         event.isCancelled = true
 
@@ -66,6 +70,6 @@ class StationBlockListener(
         val station = stationRegistry.getStation(stationId) ?: return
         val stationLevel = station.getLevel(level) ?: return
 
-        StationGui(station, stationLevel, block, itemManager, blockDataManager).open(event.player)
+        StationGui(station, stationLevel, block, itemManager, blockDataManager, cropRegistry).open(event.player)
     }
 }

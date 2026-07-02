@@ -53,6 +53,38 @@ class ItemManager(plugin: Plugin) {
         return item
     }
 
+    fun createMature(crop: Crop): ItemStack {
+        val material = Material.matchMaterial(crop.mature.material) ?: Material.WHEAT_SEEDS
+        val item = ItemStack(material)
+        val meta = item.itemMeta ?: return item
+
+        if (crop.mature.lore.isNotEmpty()) {
+            meta.lore(crop.mature.lore.map { mm.deserialize(it).decoration(TextDecoration.ITALIC, false) })
+        }
+
+        meta.persistentDataContainer.set(customItemKey, PersistentDataType.STRING, crop.fullId)
+        item.itemMeta = meta
+
+        val parsedNameString = crop.mature.name.replace("%displayName%", crop.displayName)
+        item.setData(DataComponentTypes.CUSTOM_NAME, mm.deserialize(parsedNameString).decoration(TextDecoration.ITALIC, false))
+
+        if (crop.mature.itemModel != null) {
+            item.setData(DataComponentTypes.ITEM_MODEL, Key.key(crop.mature.itemModel))
+        }
+
+        if (material == Material.PLAYER_HEAD && crop.mature.base64 != null) {
+            val profile: PlayerProfile = Bukkit.createProfile(UUID.randomUUID())
+            profile.setProperty(ProfileProperty("textures", crop.mature.base64))
+
+            (item.itemMeta as? SkullMeta)?.apply {
+                playerProfile = profile
+                item.itemMeta = this
+            }
+        }
+
+        return item
+    }
+
     fun createStationItem(station: Station): ItemStack {
         val material = Material.matchMaterial(station.block.material) ?: Material.BARREL
         val item = ItemStack(material)

@@ -11,30 +11,49 @@ levels:
   - level: 1
     storage-slots: 4
     growth-speed-multiplier: 1.0
+    max-water: 10
   - level: 2
     storage-slots: 12
     growth-speed-multiplier: 1.25
+    max-water: 40
   - level: 3
     storage-slots: 20
     growth-speed-multiplier: 1.5
+    max-water: 80
 
 gui:
   # symbols $,&,» and « are dedicated and can not be used, $ is slot for seed and & are inventory slots. Symbols »« are pagination buttons
   structure:
     - "#########"
-    - "#xxx&&&&»"
-    - "#x$x&&&&#"
-    - "#xxx&&&&«"
+    - "####&&&&»"
+    - "##$#&&&&#"
+    - "##!#&&&&«"
     - "########?"
 
   title: "<dark_gray>Growth Station"
+  status-lore:
+    growing:
+      - "<gray>Phase: <white>%stage%/%maxStage%"
+      - "<gray>Next growth in: <white>%timeLeft%"
+    waiting-water:
+      - "<gray>Phase: <white>%stage%/%maxStage%"
+      - "<red>Needs water!"
+    waiting-storage:
+      - "<gray>Phase: <white>%stage%/%maxStage%"
+      - "<red>Storage is full!"
+    empty:
+      - "<red>No seed planted"
   items:
     "#":
       material: BLACK_STAINED_GLASS_PANE
-      name: " "
+      name: "<gray>"
+      lore: []
+      # item-model: "inari:filler_item"
+    "!":
+      material: PAPER
+      name: "<green>Growth information"
       lore:
         - ""
-      # item-model: "inari:filler_item"
 
     "?":
       material: BOOK
@@ -43,6 +62,7 @@ gui:
         - "<gray>Level: %level%/%maxLevel%"
         - "<gray>Slots: %slots%"
         - "<gray>Growth speed multiplier: %multiplier%"
+        - "<gray>Water: %water%/%maxWater%"
 
     lock:
       material: BARRIER

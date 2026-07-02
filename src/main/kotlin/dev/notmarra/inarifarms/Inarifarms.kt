@@ -5,6 +5,7 @@ import dev.notmarra.inarifarms.data.BlockDataManager
 import dev.notmarra.inarifarms.items.ItemManager
 import dev.notmarra.inarifarms.listeners.CropPlantListener
 import dev.notmarra.inarifarms.listeners.StationBlockListener
+import dev.notmarra.inarifarms.listeners.StationInteractListener
 import dev.notmarra.inarifarms.stations.StationRegistry
 import dev.notmarra.inarifarms.utils.CommandBuilder
 import dev.notmarra.inarifarms.utils.config.ConfigManager
@@ -33,7 +34,8 @@ class Inarifarms : JavaPlugin() {
         val commandBuilder = CommandBuilder(this, cropRegistry, stationRegistry)
 
         server.pluginManager.registerEvents(CropPlantListener(itemManager, cropRegistry), this)
-        server.pluginManager.registerEvents(StationBlockListener(blockDataManager, itemManager, stationRegistry), this)
+        server.pluginManager.registerEvents(StationBlockListener(blockDataManager, cropRegistry, itemManager, stationRegistry), this)
+        server.pluginManager.registerEvents(StationInteractListener(blockDataManager, stationRegistry), this)
 
         this.lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) { event ->
             val commands = event.registrar()
